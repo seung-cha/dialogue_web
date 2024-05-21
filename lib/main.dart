@@ -17,17 +17,36 @@ class MyApp extends StatefulWidget {
 class _MyApp extends State<MyApp> {
   late Ros _ros;
   String text = "Hello World!";
-  late List<String> history = ["Hello World!", "String Two"];
+  List<String> history = [];
+
+  bool screenDisplayFlag = false;
 
   Future<void> subscribeDialogue(Map<String, dynamic> msg) async {
     text = msg['data'];
 
     history.add(msg['data']);
 
-    if (history.length >= 4) {
-      history.removeLast();
+    if (history.length > 4) {
+      history.removeAt(0);
     }
 
+    setState(() {});
+  }
+
+  Future<void> subscribeDialogueRobot(Map<String, dynamic> msg) async {
+    text = msg['data'];
+
+    history.add(msg['data']);
+
+    if (history.length > 4) {
+      history.removeAt(0);
+    }
+
+    setState(() {});
+  }
+
+  Future<void> subscribeBoolean(Map<String, dynamic> msg) async {
+    screenDisplayFlag = msg['data'];
     setState(() {});
   }
 
@@ -41,7 +60,21 @@ class _MyApp extends State<MyApp> {
         type: 'std_msgs/String',
         throttleRate: 100);
 
+    final speechRobotTopic = Topic(
+        ros: _ros,
+        name: '/dialogue_robot',
+        type: 'std_msgs/String',
+        throttleRate: 100);
+
+    final booleanFlagTopic = Topic(
+        ros: _ros,
+        name: '/screen_flag_display',
+        type: 'std_msgs/Bool',
+        throttleRate: 100);
+
     await speechTopic.subscribe(subscribeDialogue);
+    await speechRobotTopic.subscribe(subscribeDialogueRobot);
+    await booleanFlagTopic.subscribe(subscribeBoolean);
   }
 
   @override
@@ -97,47 +130,43 @@ class _MyApp extends State<MyApp> {
           // in the middle of the parent.
 
           child: ColoredBox(
-            color: const Color.fromARGB(255, 207, 207, 207),
+            color: screenDisplayFlag
+                ? const Color.fromARGB(255, 255, 95, 95)
+                : const Color.fromARGB(255, 154, 255, 95),
             child: Stack(
               children: [
-                Align(
-                  alignment: const Alignment(0.0, -0.5),
-                  child: ListView(
-                    shrinkWrap: true,
-                    children: const [
-                      Center(
-                        child: Text(
-                          "Boolean Flag Text 1",
-                          style: TextStyle(fontSize: 24),
-                        ),
-                      ),
-                      Center(
-                        child: Text(
-                          "Boolean Flag Text 2",
-                          style: TextStyle(fontSize: 24),
-                        ),
-                      ),
-                      Center(
-                        child: Text(
-                          "Boolean Flag Text 3",
-                          style: TextStyle(fontSize: 24),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                // Align(
+                //   alignment: const Alignment(0.0, -0.5),
+                //   child: ListView(
+                //     shrinkWrap: true,
+                //     children: [
+                //       Center(
+                //         child: Text(
+                //           screenDisplayFlag ? "Hello" : "Bye",
+                //           style: const TextStyle(fontSize: 24),
+                //         ),
+                //       ),
+                //     ],
+                //   ),
+                // ),
                 Align(
                   alignment: const Alignment(0.0, 0.0),
-                  child: ListView.builder(
+                  child: ListView.separated(
                     shrinkWrap: true,
                     itemBuilder: (context, index) {
                       return Center(
                         child: Text(
-                          history[index],
+                          history[history.length - index - 1],
                           style: const TextStyle(
-                            fontSize: 36,
+                            fontSize: 28,
                           ),
                         ),
+                      );
+                    },
+                    separatorBuilder: (context, index) {
+                      return const Divider(
+                        thickness: 5,
+                        color: Color.fromARGB(255, 0, 0, 0),
                       );
                     },
                     itemCount: history.length,
