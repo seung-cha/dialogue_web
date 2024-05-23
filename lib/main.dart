@@ -24,7 +24,7 @@ class _MyApp extends State<MyApp> {
   Future<void> subscribeDialogue(Map<String, dynamic> msg) async {
     text = msg['data'];
 
-    history.add(msg['data']);
+    // history.add(msg['data']);
 
     if (history.length > 4) {
       history.removeAt(0);
@@ -36,7 +36,7 @@ class _MyApp extends State<MyApp> {
   Future<void> subscribeDialogueRobot(Map<String, dynamic> msg) async {
     text = msg['data'];
 
-    history.add(msg['data']);
+    // history.add(msg['data']);
 
     if (history.length > 4) {
       history.removeAt(0);
